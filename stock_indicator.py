@@ -98,7 +98,7 @@ def ht_trendline(close, graph=False, **kwargs):
     if graph:
         title = 'HT_TRENDLINE - Hilbert Transform - Instantaneous Trendline'
         style = ['r-']+['--']*(len(df.columns)-1)
-        fname = '04_ha_trendline.png'
+        fname = '04_ht_trendline.png'
         make_graph(title, df, style=style, fname=fname)
     return df
 
@@ -402,7 +402,8 @@ def macd(close, graph=False, **kwargs):
         axes[0].plot(df['close'], label='close')
         axes[1].plot(df['macd'], label='macd')
         axes[1].plot(df['macdsignal'], label='macdsignal')
-        axes[1].bar(df.index, height=df['macdhist'], label='macdhist')
+        axes[1].bar(df.index, height=df['macdhist'],
+                    label='macdhist', color='green', ec='green')
         for ax in axes:
             ax.legend(loc='upper left')
         plt.savefig(fname)
