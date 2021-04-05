@@ -30,7 +30,7 @@ def get_stock(ticker, start_date, end_date):
     return df_stock
 
 
-def make_graph(title, data, style=None, fname=None, show=SHOW_GRAPH):
+def make_graph(title, data, style=None, fname=None):
     '''
     make graph
     '''
@@ -38,7 +38,7 @@ def make_graph(title, data, style=None, fname=None, show=SHOW_GRAPH):
     plt.title(title)
     if fname is not None:
         plt.savefig(fname)
-    if show:
+    if SHOW_GRAPH:
         plt.show()
     plt.close()
 
@@ -206,9 +206,15 @@ def sar(high, low, graph=False, **kwargs):
     df.columns = ['high', 'low', 'sar']
     if graph:
         title = 'SAR - Parabolic SAR'
-        style = ['r-']+['g-']+['--']*(len(df.columns)-2)
         fname = '11_sar.png'
-        make_graph(title, df, style=style, fname=fname)
+        plt.plot(df['high'], label='high')
+        plt.plot(df['low'], label='low')
+        plt.scatter(result.index, result.values, marker='.', color='green')
+        plt.title(title)
+        plt.savefig(fname)
+        if SHOW_GRAPH:
+            plt.show()
+        plt.close()
     return df
 
 
@@ -222,9 +228,21 @@ def sarext(high, low, graph=False, **kwargs):
     df.columns = ['high', 'low', 'sarext']
     if graph:
         title = 'SAREXT - Parabolic SAR - Extended'
-        style = ['r-']+['g-']+['--']*(len(df.columns)-2)
         fname = '12_sarext.png'
-        make_graph(title, df, style=style, fname=fname)
+
+        fig, ax1 = plt.subplots()
+        ax2 = ax1.twinx()
+        fig.suptitle(title)
+        ax1.plot(df['high'], label='high')
+        ax1.plot(df['low'], label='low')
+        ax2.plot(df['sarext'], label='sarext', color='green', alpha=0.7)
+        h1, l1 = ax1.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        ax1.legend(h1+h2, l1+l2, loc='upper left')
+        plt.savefig(fname)
+        if SHOW_GRAPH:
+            plt.show()
+        plt.close()
     return df
 
 
@@ -629,14 +647,17 @@ def main(ticker):
     result_all = pd.concat([result_all, result.iloc[:, 2:]], axis=1)
 
     # SAR - Parabolic SAR
-    result = sar(df['High'], df['Low'], graph=True, acceleration=0, maximum=0)
+    result = sar(df['High'], df['Low'], graph=True,
+                 acceleration=0.01, maximum=0.1)
     result_all = pd.concat([result_all, result.iloc[:, 2:]], axis=1)
 
     # SAREXT - Parabolic SAR - Extended
     result = sarext(df['High'], df['Low'],
-                    graph=True, startvalue=0, offsetonreverse=0, accelerationinitlong=0,
-                    accelerationlong=0, accelerationmaxlong=0, accelerationinitshort=0,
-                    accelerationshort=0, accelerationmaxshort=0)
+                    graph=True,
+                    startvalue=0, offsetonreverse=0,
+                    accelerationinitlong=0.02, accelerationlong=0.02,
+                    accelerationmaxlong=0.20, accelerationinitshort=0.02,
+                    accelerationshort=0.02, accelerationmaxshort=0.20)
     result_all = pd.concat([result_all, result.iloc[:, 2:]], axis=1)
 
     # SMA - Simple Moving Average
